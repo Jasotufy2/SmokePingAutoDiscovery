@@ -22,5 +22,5 @@ Automatic Device Discovery and Management for SmokePing Latency Manager
   python /etc/smokeping/config.d/manager.py
   
 Thanks for using the program and supporting.
-Ver 1.0
+Ver 1.01
   
