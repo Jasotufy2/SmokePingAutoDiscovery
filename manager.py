@@ -8,7 +8,10 @@ def getSubnets():
         if lines[i][0:13] == "        inet ":
             split_text = lines[i].split("inet ")
             final_text = split_text[1].split(" ")
-            current_addresses.append(final_text[0])
+	    if final_text[0] == "127.0.0.1":
+		continue
+	    else:
+            	current_addresses.append(final_text[0])
     return current_addresses
 
 def networkScanner(current_networks):
@@ -43,13 +46,16 @@ def nmapScan(network):
 def sortInformtation(current_networks, current_devices):
 	address_range = current_networks
 	device_info = current_devices
+	count = 0
 	final_list = []
-	for y in range(len(address_range)):
-		final_list.append([address_range[y].rsplit('.', 1)[0]])
-	for i in range(len(current_devices[0])):
-		for x in range(len(address_range)):
-			if current_devices[1][i].rsplit('.', 1)[0] == address_range[x].rsplit('.', 1)[0]:
-				final_list[x].append([current_devices[1][i] + "-" + current_devices[0][i]])
+	counter = 1
+	while counter < int(len(device_info)):
+		final_list.append([address_range[count].rsplit(".", 1)[0]])
+		for i in range(len(device_info[counter])):
+			final_list[count].append(str(device_info[counter][i] + "-" + device_info[counter-1][i]))
+		counter = counter + 2
+		count = count + 1
+
 	return final_list
 
 def smokepingTargets(current_networks, current_devices):
@@ -74,20 +80,23 @@ menu = {1}
 title = {1} - {2}
 host = {2}\n"""
 
-
 	file1 = open("Targets", "w")
 	file1.writelines(base_contents)
+	memory = []
 	for i in range(len(sortedInfo)):
-		file1.writelines(menu_contents.format(sortedInfo[i][0].replace('.', ''), sortedInfo[i][0]))
 		for x in range(len(sortedInfo[i])):
 			if x == 0:
-				continue
+				file1.writelines(menu_contents.format(sortedInfo[i][x].replace(".", ""), sortedInfo[i][x]))
 			else:
-				ip_address = sortedInfo[i][x][0].split("-")[0]
-				mac_address = sortedInfo[i][x][0].split("-")[1]
-				file1.writelines(device_contents.format(mac_address.replace(':', ''), mac_address, ip_address))
-			
+				ip_address = sortedInfo[i][x].split("-")[0]
+				mac_address = sortedInfo[i][x].split("-")[1]
+				if mac_address in memory:
+					print("Dupilcate.")
+					continue
+				file1.writelines(device_contents.format(mac_address.replace(":", ""), mac_address, ip_address))
+				memory.append(mac_address)
 	file1.close()
+	print("File has been written.")
 
 
 def main():
